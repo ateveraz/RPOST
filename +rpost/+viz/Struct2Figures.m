@@ -7,7 +7,7 @@ classdef Struct2Figures
         grid_alpha = 0.9;
         axisFontSize = 10;
         grid_color = 1.0;
-
+        legendFontSize = 10;
         xlabel_str  = 'Time [s]';
     end
 
@@ -20,6 +20,7 @@ classdef Struct2Figures
                 options.grid_alpha double = 0.9
                 options.axisFontSize double = 10
                 options.grid_color double = 1.0
+                options.legendFontSize double = 10
             end
 
             obj.line_width = options.line_width;
@@ -28,6 +29,7 @@ classdef Struct2Figures
             obj.grid_alpha = options.grid_alpha;
             obj.grid_color = options.grid_color;
             obj.axisFontSize = options.axisFontSize;
+            obj.legendFontSize = options.legendFontSize;
         end
 
         function obj = compare_variable(obj, axis_handle, dataset, experiment_names, var_str, options)
@@ -399,7 +401,6 @@ classdef Struct2Figures
                 options.customXlabel string = obj.xlabel_str
                 options.showXticks logical = false
                 options.legendPosition string = 'northoutside'
-                options.fontSizeLegend double = obj.font_size
                 options.legendBox = 'on' % 'on' or 'off' 
                 options.linkAxes logical = true % Whether to link x-axes for this axis (per-axis control)
                 options.isBoxPlot logical = false % Whether the axis is a boxplot (adjustments accordingly)
@@ -409,7 +410,7 @@ classdef Struct2Figures
                 obj = obj.add_xylabels(axis_handle, options.customXlabel, ylabel_str, options.showXticks);
             end
             if options.legend
-                obj = obj.add_legend(axis_handle, customLegend = options.customLegend, legendPosition = options.legendPosition, fontSizeLegend = options.fontSizeLegend);
+                obj = obj.add_legend(axis_handle, customLegend = options.customLegend, legendPosition = options.legendPosition);
                 % Remove box around legend if positioned outside
                 if options.legendPosition == "northoutside" || options.legendPosition == "southoutside" || options.legendBox == "off"
                     legend_handle = legend(axis_handle);
@@ -719,13 +720,12 @@ classdef Struct2Figures
                 axis_handle
                 options.customLegend cell = {}
                 options.legendPosition string = 'northoutside'
-                options.fontSizeLegend double = obj.font_size
             end
             if ~isempty(options.customLegend)
-                legend(axis_handle, options.customLegend{:}, 'FontSize', options.fontSizeLegend, 'Location', options.legendPosition, 'Interpreter', 'latex', 'Orientation', 'horizontal');
+                legend(axis_handle, options.customLegend{:}, 'FontSize', obj.legendFontSize, 'Location', options.legendPosition, 'Interpreter', 'latex', 'Orientation', 'horizontal');
                 return;
             end
-            legend(axis_handle, 'show', 'FontSize', options.fontSizeLegend, 'Location', options.legendPosition, 'Interpreter', 'latex', 'Orientation', 'horizontal');
+            legend(axis_handle, 'show', 'FontSize', obj.legendFontSize, 'Location', options.legendPosition, 'Interpreter', 'latex', 'Orientation', 'horizontal');
         end
 
         function norm_data = compute_norm(obj, data)
