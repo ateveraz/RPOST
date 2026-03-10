@@ -15,16 +15,22 @@ classdef FromFlAIR
         logging
 
         experiments
+
+        useWorldFrame
     end
     
     methods
-        function obj = FromFlAIR(settings)
-            % Constructor
+        function obj = FromFlAIR(settings, options)
+            arguments
+                settings string
+                options.use_world_frame logical = false
+            end
             obj.json_settings = jsondecode(fileread(settings));
 
             obj.logging = obj.json_settings.logging;
             obj.experiments = obj.json_settings.experiments;
             obj.nicknames = fieldnames(obj.logging);
+            obj.useWorldFrame = options.use_world_frame;
 
             obj.dataset = obj.loadBatch();
         end
@@ -41,17 +47,21 @@ classdef FromFlAIR
             data.rpy = getRPY(obj, data);
         end
 
-        function batch = loadBatch(obj, error4metrics)
+        function batch = loadBatch(obj)
 
             batch = struct;
 
             for i = 1:length(obj.experiments)
                 data_experiment = struct;
                 data_experiment.data = load(obj, obj.experiments(i).folder_path, obj.experiments(i));
+
+                if(obj.useWorldFrame)
+                    data_experiment.data = hardConvertWorldFrame(obj, data_experiment.data);
+                end
+
                 data_experiment.metadata = obj.experiments(i);
                 batch.(obj.experiments(i).name) = data_experiment;
             end
-            
         end
     end
 
@@ -135,6 +145,12 @@ classdef FromFlAIR
                 end
                 init = init + signal_size;
             end
+        end
+
+        function data = hardConvertWorldFrame(obj, data)
+            % Convert the position and velocity to the world frame by inverting the y and z axes.
+            data.x(:,2) = -data.x(:,2); % Invert y-axis for position
+            data.x(:,3) = -data.x(:,3); % Invert z-axis for position
         end
 
         function metrics = computeMetrics(~, t, error)
