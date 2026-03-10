@@ -111,6 +111,35 @@ classdef Struct2Figures
             
         end
 
+        function obj = plotXYZ(obj, axis_handle, dataset, experiment_names, options)
+            arguments
+                obj
+                axis_handle
+                dataset
+                experiment_names
+                options.xydim (1,3) double = [1 2 3] % Dimensions for x, y and z variables
+                options.markerStyle string = 'none' % Marker style for plots
+                options.markerSkip double = 1 % Marker skip for plots
+                options.show_legend logical = true % Whether to show legend or not
+                options.var_str string = 'x' % Variable name string to plot
+            end
+
+            n_experiments = length(experiment_names);
+
+            hold(axis_handle, 'on');
+
+            for i = 1:n_experiments
+                exp_name = experiment_names{i};
+                experiment = dataset.(exp_name);
+                xyz_signal = experiment.data.(options.var_str);
+                x_data = xyz_signal(:, options.xydim(1));
+                y_data = xyz_signal(:, options.xydim(2));
+                z_data = xyz_signal(:, options.xydim(3));
+                plot3(axis_handle, x_data(1:options.markerSkip:end), y_data(1:options.markerSkip:end), z_data(1:options.markerSkip:end), 'LineStyle', experiment.metadata.LineStyle, 'Color', experiment.metadata.color, 'LineWidth', obj.line_width, 'DisplayName', experiment.metadata.label);
+            end
+
+        end
+
         function obj = add_signals(obj, axis_handle, experiment, var_str, options)
             arguments
                 obj
