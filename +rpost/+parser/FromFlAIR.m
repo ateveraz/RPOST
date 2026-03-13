@@ -98,7 +98,9 @@ classdef FromFlAIR
             
             for i = 1:num_signals
                 try 
-                    mask = ~cellfun(@isempty, strfind(textAsCells, desired_signals{i}));
+                    % Use regex with word boundaries to avoid partial matches (e.g. 'y' matching 'dy')
+                    safe_signal_name = regexptranslate('escape', desired_signals{i});
+                    mask = ~cellfun(@isempty, regexp(textAsCells, strcat('\<', safe_signal_name, '\>'), 'once'));
                     the_one_line = textAsCells(mask);
                     b = regexp(the_one_line{1},'\d*','Match');
                     data_raw(:,i) = all_values(:,str2double(b(1)));
@@ -111,6 +113,7 @@ classdef FromFlAIR
         function [all_labels, all_values] = readFiles(obj)
             all_labels = fileread(obj.path_file_txt);
             all_values = readmatrix(obj.path_file_csv);
+            all_values = all_values(1:2:end, :);
         end
 
         function data = getRequiredSignals(obj, params)
