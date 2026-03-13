@@ -1,6 +1,6 @@
 classdef FromFlAIR
     % FromFlAIR is a class that loads the data from the FlAIR datalog and computes the metrics and energy.
-    
+
     properties (Access = public)
         dataset
     end
@@ -176,6 +176,7 @@ classdef FromFlAIR
         end     
         
         function output = getRPY(~, data)
+            import rpost.utils.quat2rpy
             [n, ~] = size(data.q);
             rpy = zeros(n, 3);
 
