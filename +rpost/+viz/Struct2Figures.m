@@ -478,17 +478,18 @@ classdef Struct2Figures
             end
         end
 
-        function obj = add_custom_reference(obj, axis_handle, orientation, data, label_str, style_line, options)
+        function obj = add_custom_reference(obj, axis_handle, orientation, data, label_str, options)
             arguments
                 obj
                 axis_handle
                 orientation (1,:) string % 'horizontal' or 'vertical'
                 data (1,:) double % Data points where to add reference lines
                 label_str (1,:) string % Label for the reference lines
-                style_line (1,:) string = ':k' % Line style for the reference lines
+                options.style_line (1,:) string = ':k' % Line style for the reference lines
                 options.legend (1,:) string = 'off' % 'on' or 'off' for legend visibility
                 options.opposite_range double = [] % Optional opposite axis range to plot line across
                 options.line_width double = obj.line_width % Line width for the reference lines
+                options.color string = 'k' % Color for the reference lines
             end
 
             hold(axis_handle, 'on');
@@ -496,16 +497,16 @@ classdef Struct2Figures
             for i = 1:length(data)
                 if orientation == "horizontal"
                     if ~isempty(options.opposite_range)
-                        plot(axis_handle, options.opposite_range, [data(i) data(i)], style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend);
+                        plot(axis_handle, options.opposite_range, [data(i) data(i)], options.style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend, 'Color', options.color);
                         continue;
                     end
-                        yline(axis_handle, data(i), style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend);
+                        yline(axis_handle, data(i), options.style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend, 'Color', options.color);
                 elseif orientation == "vertical"
                     if ~isempty(options.opposite_range)
-                        plot(axis_handle, [data(i) data(i)], options.opposite_range, style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend);
+                        plot(axis_handle, [data(i) data(i)], options.opposite_range, options.style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend, 'Color', options.color);
                         continue;
                     end
-                    xline(axis_handle, data(i), style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend);
+                    xline(axis_handle, data(i), options.style_line, 'LineWidth', options.line_width, 'DisplayName', label_str, 'HandleVisibility', options.legend, 'Color', options.color);
                 end
             end
             
