@@ -185,8 +185,6 @@ classdef FromFlAIR
 
             for i = 1:n
                 rpy(i,:) = quat2rpy(data.q(i,:));
-                temp = quat2rpy(data.q_v(i,:));
-                rpy(i,3) = temp(3);
             end
 
             output = rpy*180/pi;
