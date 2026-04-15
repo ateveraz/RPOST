@@ -33,7 +33,7 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
         simu
         exp_names  cell
         var_name   char
-        opts.metrics  cell     = {'ise','iae','itae','itse','linf','ss_stats'}
+        opts.metrics  cell     = {'ise','iae','itae','itse','linf','ss_stats', 'rmse'}
         opts.ss_ratio double   = 0.8
         opts.do_plot  logical  = false
     end
