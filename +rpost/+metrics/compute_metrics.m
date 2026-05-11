@@ -19,6 +19,7 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
     %                 'ss_ratio'  scalar in (0,1), fraction of time window
     %                             considered steady-state (default: 0.8)
     %                 'do_plot'   logical, display summary table (default: false)
+    %                 'others2plot' struct, exp_name within their labels and values' metrics
     %
     % OUTPUT:
     %   m - struct where m.(exp_name).(metric) holds each result.
@@ -36,6 +37,7 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
         opts.metrics  cell     = {'ise','iae','itae','itse','linf','ss_stats', 'rmse'}
         opts.ss_ratio double   = 0.8
         opts.do_plot  logical  = false
+        opts.others2plot struct   = struct()
     end
 
     % --- Map metric names to function handles ---
@@ -49,6 +51,8 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
         'ss_stats', @(t,v) rpost.metrics.ss_stats(t, v, ss_ratio), ...
         'rmse',     @(t,v) rpost.metrics.rmse(t, v)          ...
     );
+
+    plotOthers = ~isempty(opts.others2plot) && any(ismember(exp_names, fieldnames(opts.others2plot)));
 
     % --- Validate requested metrics ---
     for k = 1:length(opts.metrics)
@@ -71,12 +75,29 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
             fn = available.(metric_name);
             m.(name).(metric_name) = fn(t, norm_v);
         end
+
+        if isfield(opts.others2plot, name) && plotOthers
+            other_metrics_per_exp = fieldnames(opts.others2plot.(name));
+            for k = 1:length(other_metrics_per_exp)
+                metric_name = other_metrics_per_exp{k};
+                m.(name).(metric_name) = opts.others2plot.(name).(metric_name);
+            end
+        end
     end
 
     % --- Optional table display ---
     if opts.do_plot
         scalar_metrics = opts.metrics(~strcmp(opts.metrics, 'ss_stats'));
+
+        % Include any additional scalar metrics already stored in m
+        for iExp = 1:length(exp_names)
+            exp_fields = fieldnames(m.(exp_names{iExp}))';
+            exp_fields = setdiff(exp_fields, {'ss_stats'}, 'stable');
+            scalar_metrics = [scalar_metrics, setdiff(exp_fields, scalar_metrics, 'stable')]; %#ok<AGROW>
+        end
+
         names_col = string(exp_names');
+                        
         T = table(names_col, 'VariableNames', {'Experiment'});
 
         for k = 1:length(scalar_metrics)
@@ -87,7 +108,7 @@ function m = compute_metrics(simu, exp_names, var_name, opts)
 
         if ismember('ss_stats', opts.metrics)
             T.SS_Mean = cellfun(@(n) m.(n).ss_stats.mean, exp_names)';
-            T.SS_Std  = cellfun(@(n) m.(n).ss_stats.std,  exp_names)';
+            % T.SS_Std  = cellfun(@(n) m.(n).ss_stats.std,  exp_names)';
         end
 
         fprintf('\n--- Performance Metrics: %s ---\n', var_name);
